@@ -51,10 +51,9 @@ var requestHandler = function(request, response) {
       body.results.push(tempMessage);
     });
     request.on('end', function() {
+      response.writeHead(statusCode, headers);
+      response.end('Success');  
     });
-
-    response.writeHead(statusCode, headers);
-    response.end();  
   } else {
     var statusCode = 404;
     response.writeHead(statusCode, headers);

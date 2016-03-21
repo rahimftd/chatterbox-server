@@ -1,5 +1,6 @@
 var request = require('request');
 var expect = require('chai').expect;
+var handleRequest = require('../request-handler.js');
 
 describe('server', function() {
   it('should respond to GET requests for /log with a 200 status code', function(done) {
@@ -35,14 +36,14 @@ describe('server', function() {
 
   it('should accept POST requests to /send', function(done) {
     var requestParams = {method: 'POST',
-      uri: 'http://127.0.0.1:3000/classes/messages',
+      uri: 'http://127.0.0.1:3000/send',
       json: {
         username: 'Jono',
         message: 'Do my bidding!'}
     };
 
     request(requestParams, function(error, response, body) {
-      expect(response.statusCode).to.equal(201);
+      expect(response.statusCode).to.equal(201);  
       done();
     });
   });

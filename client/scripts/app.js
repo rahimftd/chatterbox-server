@@ -3,7 +3,7 @@ var app = {
 
   //TODO: The current 'addFriend' function just adds the class 'friend'
   //to all messages sent by the user
-  server: 'https://api.parse.com/1/classes/messages/',
+  server: 'http://127.0.0.1:3000/classes/messages/',
   username: 'anonymous',
   roomname: 'lobby',
   lastMessageId: 0,
@@ -47,6 +47,7 @@ var app = {
       success: function (data) {
         // Trigger a fetch to update the messages, pass true to animate
         app.fetch();
+        console.log('Successfully sent message');
       },
       error: function (data) {
         console.error('chatterbox: Failed to send message', data);
@@ -59,9 +60,13 @@ var app = {
       url: app.server,
       type: 'GET',
       contentType: 'application/json',
-      data: { order: '-createdAt'},
+      // data: { order: '-createdAt'},
       success: function(data) {
+        // var parsed = JSON.parse(data);
+        console.log('Successfully fetched message');
         // Don't bother if we have nothing to work with
+        console.log(data.results);
+        
         if (!data.results || !data.results.length) { return; }
 
         // Get the last message
@@ -69,16 +74,16 @@ var app = {
         var displayedRoom = $('.chat span').first().data('roomname');
         app.stopSpinner();
         // Only bother updating the DOM if we have a new message
-        if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
-          // Update the UI with the fetched rooms
-          app.populateRooms(data.results);
+        // if (mostRecentMessage.objectId !== app.lastMessageId || app.roomname !== displayedRoom) {
+        // Update the UI with the fetched rooms
+        app.populateRooms(data.results);
 
-          // Update the UI with the fetched messages
-          app.populateMessages(data.results, animate);
+        // Update the UI with the fetched messages
+        app.populateMessages(data.results, animate);
 
           // Store the ID of the most recent message
-          app.lastMessageId = mostRecentMessage.objectId;
-        }
+          // app.lastMessageId = mostRecentMessage.objectId;
+        // }
       },
       error: function(data) {
         console.error('chatterbox: Failed to fetch messages');
@@ -226,12 +231,12 @@ var app = {
 
   startSpinner: function() {
     $('.spinner img').show();
-    $('form input[type=submit]').attr('disabled', 'true');
+    // $('form input[type=submit]').attr('disabled', 'true');
   },
 
   stopSpinner: function() {
     $('.spinner img').fadeOut('fast');
-    $('form input[type=submit]').attr('disabled', null);
+    // $('form input[type=submit]').attr('disabled', null);
   }
 };
 

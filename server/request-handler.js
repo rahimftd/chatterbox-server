@@ -11,6 +11,9 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var fs = require('fs');
+var path = require('path');
+var indexFileName = 'client/index.html';
 var body = {
   results: []    
 };
@@ -31,18 +34,18 @@ var requestHandler = function(request, response) {
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
   var headers = defaultCorsHeaders;
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
   
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
 
-  if (request.url === '/classes/messages' && request.method === 'GET') {
+  if (request.method === 'GET' && request.url === '/classes/messages/') {
     var statusCode = 200;
 
 
     response.writeHead(statusCode, headers);
     response.end(JSON.stringify(body));
 
-  } else if (request.method === 'POST' || request.url === '/send') {
+  } else if (request.method === 'POST' && request.url === '/classes/messages/') {
     var statusCode = 201;
 
     // Add new message to body
@@ -52,8 +55,51 @@ var requestHandler = function(request, response) {
     });
     request.on('end', function() {
       response.writeHead(statusCode, headers);
-      response.end('Success');  
+      response.end(JSON.stringify(''));
     });
+  } else if (request.method === 'OPTIONS') {
+    var statusCode = 200;
+    response.writeHead(statusCode, headers);
+    response.end('');
+  } else if (request.url === '/' && request.method === 'GET') {
+    var statusCode = 200;
+    headers['Content-Type'] = 'text/html';
+    var extname = path.extname(indexFileName);
+
+    if (extname === 'js') {
+      headers['Content-Type'] = 'text/javascript';
+    } else if (extname === 'css') {
+      headers['Content-Type'] = 'text/css';
+    }
+
+    fs.exists(indexFileName, function(exists) {
+      if (exists) {
+        fs.readFile(indexFileName, 'utf8', function(error, data) {
+          if (error) {
+            console.log("Error");
+          } else {
+            response.writeHead(statusCode, headers);
+            response.end(data);
+            console.log(data);
+          }
+        });
+      }
+    });
+    // fs.exists(indexFileName, function(exists) {
+    //   if (exists) {
+    //     fs.readFile(indexFileName, 'utf8', function(error, data) {
+    //       if (error) {
+    //         throw error;
+    //         console.log(data);
+    //       } else {
+    //         response.writeHead(statusCode, headers);
+    //         response.end(data);
+    //       }
+    //     });
+    //   }
+    // });
+
+
   } else {
     var statusCode = 404;
     response.writeHead(statusCode, headers);

@@ -1,43 +1,72 @@
-/* Import node's http module: */
-var http = require('http');
+/*************************************************************
+
+You should implement your request handler function in this file.
+
+requestHandler is already getting passed to http.createServer()
+in basic-server.js, but it won't work as is.
+
+You'll have to figure out a way to export this function from
+this file and include it in basic-server.js so that it actually works.
+
+*Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
+
+**************************************************************/
 var fs = require('fs');
-var handleRequest = require('./request-handler.js').requestHandler;
+var path = require('path');
+var mime = require('mime');
 var express = require('express');
+var bodyParser = require('body-parser');
+var body = {
+  results: []    
+};
 
-
-var app = express();
-// Every server needs to listen on a port with a unique number. The
-// standard port for HTTP servers is port 80, but that port is
-// normally already claimed by another server and/or not accessible
-// so we'll use a standard testing port like 3000, other common development
-// ports are 8080 and 1337.
-var port = 3000;
-
-// For now, since you're running this server on your local machine,
-// we'll have it listen on the IP address 127.0.0.1, which is a
-// special address that always refers to localhost.
-var ip = '127.0.0.1';
-
-// We use node's http module to create a server.
-//
-// The function we pass to http.createServer will be used to handle all
-// incoming requests.
-//
-// After creating the server, we will tell it to listen on the given port and IP. */
-var server = app.listen(port, ip, function() {
-  console.log('Listening on http://' + ip + ':' + port);
+fs.exists('messages.txt', function(exists) {
+  if (exists) {
+    fs.readFile('messages.txt', function(error, data) {
+      if (error) {
+        console.log('Failed to load messages.txt', error);
+      } else { 
+        body = JSON.parse(data);
+      }
+    });
+  } else {
+    console.log('Failed to load messages.txt');
+  }
 });
 
-// To start this server, run:
-//
-//   node basic-server.js
-//
-// on the command line.
-//
-// To connect to the server, load http://127.0.0.1:3000 in your web
-// browser.
-//
-// server.listen() will continue running as long as there is the
-// possibility of serving more requests. To stop your server, hit
-// Ctrl-C on the command line.
+app = express();
+app.use(bodyParser.json());
+app.use(express.static('client'));
 
+var port = 3000;
+var ip = '127.0.0.1';
+app.listen(port, ip, function() {
+  console.log('Listening at ' + ip + ':' + port);
+});
+
+app.all('/classes/messages', function(request, response, next) {
+  response.header('access-control-allow-origin', '*');
+  response.header('access-control-allow-methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.header('access-control-allow-headers', 'content-type, accept');
+  response.header('access-control-max-age', 10);
+  next();
+});
+app.get('/classes/messages', function(request, response) {
+  if (request.method === 'OPTIONS') {
+    response.send(200);
+  }
+  response.header();
+  response.status(200).json(body);
+});
+app.post('/classes/messages', function(request, response) {
+  body.results.push(request.body);
+  response.status(201).end();
+  console.log('Successfully received message');
+  fs.writeFile('messages.txt', JSON.stringify(body), function(err) {
+    if (err) {
+      throw err;
+    } else {
+      console.log('Successfully saved messages: ');
+    }
+  });
+});

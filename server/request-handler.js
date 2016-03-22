@@ -13,10 +13,24 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 var fs = require('fs');
 var path = require('path');
-var indexFileName = 'client/index.html';
+var mime = require('mime');
 var body = {
   results: []    
 };
+
+fs.exists('messages.txt', function(exists) {
+  if (exists) {
+    fs.readFile('messages.txt', function(error, data) {
+      if (error) {
+        console.log('Failed to load messages.txt', error);
+      } else { 
+        body = JSON.parse(data);
+      }
+    });
+  } else {
+    console.log('Failed to load messages.txt');
+  }
+});
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -56,50 +70,47 @@ var requestHandler = function(request, response) {
     request.on('end', function() {
       response.writeHead(statusCode, headers);
       response.end(JSON.stringify(''));
+      fs.writeFile('messages.txt', JSON.stringify(body), function(err) {
+        if (err) {
+          throw err;
+        } else {
+          console.log('Successfully saved messages: ');
+        }
+      });
     });
   } else if (request.method === 'OPTIONS') {
     var statusCode = 200;
     response.writeHead(statusCode, headers);
     response.end('');
-  } else if (request.url === '/' && request.method === 'GET') {
-    var statusCode = 200;
-    headers['Content-Type'] = 'text/html';
-    var extname = path.extname(indexFileName);
+  } else if (request.method === 'GET') {
+    var encoding = 'utf8';
+    var url = removeUrlParameters(request.url);
 
-    if (extname === 'js') {
-      headers['Content-Type'] = 'text/javascript';
-    } else if (extname === 'css') {
-      headers['Content-Type'] = 'text/css';
+    if (url === '/') {
+      headers['Content-Type'] = 'text/html';
+      url = '/client/index.html';
     }
-
-    fs.exists(indexFileName, function(exists) {
+    
+    fs.exists(url.slice(1), function(exists) {
       if (exists) {
-        fs.readFile(indexFileName, 'utf8', function(error, data) {
+        fs.readFile(url.slice(1), encoding, function(error, data) {
           if (error) {
-            console.log("Error");
+            var statusCode = 404;
+            response.writeHead(statusCode, headers);
+            response.end();
           } else {
+            var statusCode = 200;
+            headers['Content-Type'] = mime.lookup(url);
             response.writeHead(statusCode, headers);
             response.end(data);
-            console.log(data);
           }
         });
+      } else {
+        var statusCode = 404;
+        response.writeHead(statusCode, headers);
+        response.end();
       }
     });
-    // fs.exists(indexFileName, function(exists) {
-    //   if (exists) {
-    //     fs.readFile(indexFileName, 'utf8', function(error, data) {
-    //       if (error) {
-    //         throw error;
-    //         console.log(data);
-    //       } else {
-    //         response.writeHead(statusCode, headers);
-    //         response.end(data);
-    //       }
-    //     });
-    //   }
-    // });
-
-
   } else {
     var statusCode = 404;
     response.writeHead(statusCode, headers);
@@ -127,6 +138,14 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
+};
+
+var removeUrlParameters = function(url) {
+  var paramIndex = url.indexOf('?');
+  if (paramIndex !== -1) {
+    url = url.slice(0, paramIndex);
+  }
+  return url;
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).

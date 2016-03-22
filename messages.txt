@@ -1,0 +1,1 @@
+{"results":[{"username":"Vini","text":"hi","roomname":"lobby"},{"username":"Vini","text":"hi","roomname":"lobby"},{"username":"Vini","text":"hi","roomname":"lobby"},{"username":"Vini","text":"hi","roomname":"lobby"},{"username":"Vini","text":"hi","roomname":"lobby"},{"username":"Vini","text":"message","roomname":"lobby"}]}

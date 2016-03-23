@@ -41,7 +41,7 @@ app.use(express.static('client'));
 var port = process.env.PORT || 3000;
 // var ip = '127.0.0.1';
 app.listen(port, function() {
-  console.log('Listening at ' + ip + ':' + port);
+  console.log('Server running...');
 });
 
 app.all('/classes/messages', function(request, response, next) {

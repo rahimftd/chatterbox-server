@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node server/basic-server.js",
     "test": "mocha server/spec"
-    // "postinstall": "curl -s https://raw.githubusercontent.com/hackreactor-labs/pomander/master/bin/install | bash"
   },
   "engines": {
     "node": "4.2.6"

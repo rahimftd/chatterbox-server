@@ -13,7 +13,7 @@ this file and include it in basic-server.js so that it actually works.
 **************************************************************/
 var fs = require('fs');
 var path = require('path');
-var mime = require('mime');
+// var mime = require('mime');
 var express = require('express');
 var bodyParser = require('body-parser');
 var body = {

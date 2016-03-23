@@ -38,9 +38,9 @@ app = express();
 app.use(bodyParser.json());
 app.use(express.static('client'));
 
-var port = 3000;
-var ip = '127.0.0.1';
-app.listen(port, ip, function() {
+var port = process.env.PORT || 3000;
+// var ip = '127.0.0.1';
+app.listen(port, function() {
   console.log('Listening at ' + ip + ':' + port);
 });
 
